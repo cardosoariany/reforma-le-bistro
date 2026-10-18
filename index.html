@@ -12,6 +12,439 @@
       --black: #0E0E0E;
       --off-white: #F5F4EF;
       --pink-accent: #F2C4C4;
-      
       --bg: #F5F4EF;
-      --card
+      --card: #FFFFFF;
+      --border: #D8D6CE;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--black); padding: 20px; }
+
+    header {
+      background: var(--black);
+      color: var(--off-white);
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 8px solid var(--green-primary);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    header h1 { font-size: 1.8rem; color: var(--off-white); }
+    header p { color: var(--green-light); font-size: 0.95rem; }
+
+    .header-actions { display: flex; gap: 8px; }
+    .btn-action {
+      background: var(--green-light);
+      color: var(--black);
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    nav { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    nav button {
+      padding: 12px 20px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--black);
+      cursor: pointer;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    nav button.active { background: var(--green-primary); color: var(--off-white); border-color: var(--green-primary); }
+
+    .tab-content { display: none; background: var(--card); padding: 24px; border-radius: 12px; border: 1px solid var(--border); }
+    .tab-content.active { display: block !important; }
+    .tab-content h2 { margin-bottom: 16px; color: var(--black); border-bottom: 2px solid var(--green-light); padding-bottom: 8px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    form { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+    input, select { padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--off-white); outline: none; }
+    
+    button.btn-submit {
+      background: var(--green-primary);
+      color: var(--off-white);
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid var(--border); padding: 12px; text-align: left; }
+    th { background: var(--off-white); font-weight: 700; }
+
+    .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; margin-top: 15px; }
+    .gallery-item { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff; }
+    .gallery-item img { width: 100%; height: 150px; object-fit: cover; }
+    .gallery-item p { padding: 10px; font-size: 0.88rem; text-align: center; }
+
+    .kpi-container { display: flex; gap: 15px; margin-bottom: 24px; flex-wrap: wrap; }
+    .kpi-card { flex: 1; min-width: 180px; background: var(--off-white); padding: 18px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
+    .kpi-card h3 { font-size: 1.6rem; color: var(--green-primary); margin-top: 6px; }
+
+    .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
+    .badge-Aprovado, .badge-Concluído { background: var(--green-light); }
+    .badge-EmCotação { background: var(--pink-accent); }
+    .badge-EmExecução { background: #E2E8F0; }
+
+    .pending-box { background: #FFF5F5; border: 1px solid var(--pink-accent); border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+    .activity-card { background: var(--off-white); border: 1px solid var(--border); border-left: 5px solid var(--green-primary); border-radius: 6px; padding: 12px 16px; margin-bottom: 10px; display: flex; justify-content: space-between; }
+    .activity-card.pending { border-left-color: var(--pink-accent); }
+
+    .btn-delete { background: #EF4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>LE BISTRÔ</h1>
+      <p>Acompanhamento de Cronograma & Controle de Obra</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-action" onclick="exportBackup()">📥 Exportar Dados</button>
+      <button class="btn-action" onclick="document.getElementById('import-file').click()">📤 Importar Dados</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(event)">
+    </div>
+  </header>
+
+  <nav>
+    <button class="tab-btn active" id="btn-dashboard" onclick="switchTab('dashboard')">⏱️ Cronograma & Pendências</button>
+    <button class="tab-btn" id="btn-orcamentos" onclick="switchTab('orcamentos')">💰 Serviços & Orçamentos</button>
+    <button class="tab-btn" id="btn-projetos" onclick="switchTab('projetos')">📐 Projetos & Plantas</button>
+    <button class="tab-btn" id="btn-inspiracoes" onclick="switchTab('inspiracoes')">💡 Inspirações</button>
+    <button class="tab-btn" id="btn-aprovados" onclick="switchTab('aprovados')">✅ Aprovados</button>
+  </nav>
+
+  <!-- TAB: DASHBOARD -->
+  <div id="dashboard" class="tab-content active">
+    <h2>Visão Geral do Cronograma</h2>
+    <div class="kpi-container">
+      <div class="kpi-card"><p>Pendentes</p><h3 id="kpi-pendentes" style="color: #B91C1C;">0</h3></div>
+      <div class="kpi-card"><p>Em Execução</p><h3 id="kpi-execucao">0</h3></div>
+      <div class="kpi-card"><p>Concluídos</p><h3 id="kpi-concluidos">0</h3></div>
+      <div class="kpi-card"><p>Total Etapas</p><h3 id="kpi-total-etapas">0</h3></div>
+    </div>
+
+    <div class="pending-box">
+      <h3 style="color:#B91C1C; margin-bottom:10px;">⚠️ Pendente de Aprovação</h3>
+      <div id="lista-pendencias"><p style="font-size:0.9rem; color:#666;">Nenhuma pendência crítica.</p></div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <h3 style="margin-bottom: 12px;">📅 Próximas Atividades</h3>
+        <div id="lista-proximas-atividades"><p style="font-size:0.9rem; color:#666;">Nenhum serviço cadastrado.</p></div>
+      </div>
+      <div>
+        <canvas id="chartStatus"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: SERVIÇOS E ORÇAMENTOS -->
+  <div id="orcamentos" class="tab-content">
+    <h2>Serviços, Prazos e Orçamentos</h2>
+    <form id="form-orcamento">
+      <div class="grid-2">
+        <input type="text" id="orc-servico" placeholder="Serviço / Etapa" required>
+        <input type="text" id="orc-fornecedor" placeholder="Fornecedor / Responsável" required>
+      </div>
+      <div class="grid-2">
+        <input type="number" id="orc-valor" placeholder="Valor (R$)" step="0.01" required>
+        <select id="orc-status">
+          <option value="Em Cotação">Em Cotação (Pendente)</option>
+          <option value="Aprovado">Aprovado</option>
+          <option value="Em Execução">Em Execução</option>
+          <option value="Concluído">Concluído</option>
+        </select>
+      </div>
+      <div class="grid-2">
+        <input type="date" id="orc-data" required>
+        <input type="file" id="orc-file" accept="image/*,.pdf">
+      </div>
+      <button type="submit" class="btn-submit">Cadastrar Serviço</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Serviço</th><th>Responsável</th><th>Entrega</th><th>Valor</th><th>Status</th><th>Anexo</th><th>Ação</th>
+        </tr>
+      </thead>
+      <tbody id="table-orcamentos"></tbody>
+    </table>
+  </div>
+
+  <!-- TAB: PROJETOS -->
+  <div id="projetos" class="tab-content">
+    <h2>Documentos e Projetos Técnicos</h2>
+    <form id="form-projeto">
+      <input type="text" id="proj-nome" placeholder="Nome do Projeto" required>
+      <input type="file" id="proj-file" accept="image/*,.pdf" required>
+      <button type="submit" class="btn-submit">Anexar Projeto</button>
+    </form>
+    <div class="gallery" id="gallery-projetos"></div>
+  </div>
+
+  <!-- TAB: INSPIRAÇÕES -->
+  <div id="inspiracoes" class="tab-content">
+    <h2>Painel de Inspirações (Moodboard)</h2>
+    <form id="form-inspiracao">
+      <input type="text" id="insp-desc" placeholder="Descrição / Ambiente" required>
+      <input type="file" id="insp-file" accept="image/*" required>
+      <button type="submit" class="btn-submit">Adicionar Inspiração</button>
+    </form>
+    <div class="gallery" id="gallery-inspiracoes"></div>
+  </div>
+
+  <!-- TAB: APROVADOS -->
+  <div id="aprovados" class="tab-content">
+    <h2>Central de Aprovados</h2>
+    <table>
+      <thead>
+        <tr><th>Tipo</th><th>Descrição</th><th>Fornecedor</th><th>Entrega</th><th>Valor</th><th>Arquivo</th></tr>
+      </thead>
+      <tbody id="table-aprovados"></tbody>
+    </table>
+  </div>
+
+  <script>
+    var state = { orcamentos: [], projetos: [], inspiracoes: [] };
+
+    try {
+      state.orcamentos = JSON.parse(localStorage.getItem('lebistro_orcamentos')) || [];
+      state.projetos = JSON.parse(localStorage.getItem('lebistro_projetos')) || [];
+      state.inspiracoes = JSON.parse(localStorage.getItem('lebistro_inspiracoes')) || [];
+    } catch(e) {}
+
+    function saveState() {
+      try {
+        localStorage.setItem('lebistro_orcamentos', JSON.stringify(state.orcamentos));
+        localStorage.setItem('lebistro_projetos', JSON.stringify(state.projetos));
+        localStorage.setItem('lebistro_inspiracoes', JSON.stringify(state.inspiracoes));
+      } catch(e) {}
+      updateUI();
+    }
+
+    // Função de Troca de Abas Simplificada e Infalível
+    function switchTab(tabId) {
+      var tabs = document.querySelectorAll('.tab-content');
+      for (var i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove('active');
+        tabs[i].style.display = 'none';
+      }
+
+      var btns = document.querySelectorAll('.tab-btn');
+      for (var j = 0; j < btns.length; j++) {
+        btns[j].classList.remove('active');
+      }
+
+      var activeTab = document.getElementById(tabId);
+      if (activeTab) {
+        activeTab.classList.add('active');
+        activeTab.style.display = 'block';
+      }
+
+      var activeBtn = document.getElementById('btn-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+      }
+
+      if (tabId === 'dashboard') {
+        renderCharts();
+      }
+    }
+
+    var toBase64 = function(file) {
+      return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function() { resolve(reader.result); };
+        reader.onerror = function(error) { reject(error); };
+      });
+    };
+
+    document.getElementById('form-orcamento').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var fileInput = document.getElementById('orc-file');
+      var fileData = null;
+      if (fileInput.files[0]) {
+        fileData = await toBase64(fileInput.files[0]);
+      }
+
+      state.orcamentos.push({
+        id: Date.now(),
+        servico: document.getElementById('orc-servico').value,
+        fornecedor: document.getElementById('orc-fornecedor').value,
+        valor: parseFloat(document.getElementById('orc-valor').value),
+        status: document.getElementById('orc-status').value,
+        dataEntrega: document.getElementById('orc-data').value,
+        anexo: fileData
+      });
+
+      e.target.reset();
+      saveState();
+    });
+
+    document.getElementById('form-projeto').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var file = document.getElementById('proj-file').files[0];
+      var fileData = await toBase64(file);
+
+      state.projetos.push({
+        id: Date.now(),
+        nome: document.getElementById('proj-nome').value,
+        arquivo: fileData,
+        tipo: file.type
+      });
+
+      e.target.reset();
+      saveState();
+    });
+
+    document.getElementById('form-inspiracao').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var file = document.getElementById('insp-file').files[0];
+      var fileData = await toBase64(file);
+
+      state.inspiracoes.push({
+        id: Date.now(),
+        desc: document.getElementById('insp-desc').value,
+        arquivo: fileData
+      });
+
+      e.target.reset();
+      saveState();
+    });
+
+    function deleteOrcamento(id) {
+      if (confirm('Remover este item?')) {
+        state.orcamentos = state.orcamentos.filter(function(i) { return i.id !== id; });
+        saveState();
+      }
+    }
+
+    function exportBackup() {
+      var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+      var a = document.createElement('a');
+      a.href = dataStr;
+      a.download = "backup_lebistro.json";
+      a.click();
+    }
+
+    function importBackup(e) {
+      var reader = new FileReader();
+      reader.onload = function(event) {
+        try {
+          state = JSON.parse(event.target.result);
+          saveState();
+          alert('Dados carregados!');
+        } catch(err) { alert('Arquivo inválido.'); }
+      };
+      if (e.target.files[0]) reader.readAsText(e.target.files[0]);
+    }
+
+    function updateUI() {
+      var tbodyOrc = document.getElementById('table-orcamentos');
+      tbodyOrc.innerHTML = state.orcamentos.map(function(item) {
+        return '<tr>' +
+          '<td>' + item.servico + '</td>' +
+          '<td>' + item.fornecedor + '</td>' +
+          '<td>' + (item.dataEntrega ? new Date(item.dataEntrega + 'T00:00:00').toLocaleDateString('pt-BR') : '-') + '</td>' +
+          '<td>R$ ' + item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '</td>' +
+          '<td><span class="badge badge-' + item.status.replace(/\s+/g, '') + '">' + item.status + '</span></td>' +
+          '<td>' + (item.anexo ? '<a href="' + item.anexo + '" download>Baixar</a>' : '-') + '</td>' +
+          '<td><button class="btn-delete" onclick="deleteOrcamento(' + item.id + ')">X</button></td>' +
+        '</tr>';
+      }).join('');
+
+      var galProj = document.getElementById('gallery-projetos');
+      galProj.innerHTML = state.projetos.map(function(p) {
+        return '<div class="gallery-item">' +
+          (p.tipo.includes('image') ? '<img src="' + p.arquivo + '">' : '<div style="padding:30px;text-align:center">📄 PDF</div>') +
+          '<p>' + p.nome + '</p>' +
+          '<a href="' + p.arquivo + '" download="' + p.nome + '" style="display:block;text-align:center;padding:5px;">Baixar</a>' +
+        '</div>';
+      }).join('');
+
+      var galInsp = document.getElementById('gallery-inspiracoes');
+      galInsp.innerHTML = state.inspiracoes.map(function(i) {
+        return '<div class="gallery-item"><img src="' + i.arquivo + '"><p>' + i.desc + '</p></div>';
+      }).join('');
+
+      var tbodyAprov = document.getElementById('table-aprovados');
+      var aprovados = state.orcamentos.filter(function(i) { return i.status === 'Aprovado' || i.status === 'Concluído'; });
+      tbodyAprov.innerHTML = aprovados.map(function(item) {
+        return '<tr><td>Serviço</td><td>' + item.servico + '</td><td>' + item.fornecedor + '</td><td>' + (item.dataEntrega || '-') + '</td><td>R$ ' + item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '</td><td>' + (item.anexo ? '<a href="' + item.anexo + '" download>Baixar</a>' : '-') + '</td></tr>';
+      }).join('');
+
+      var pendentes = state.orcamentos.filter(function(i) { return i.status === 'Em Cotação'; });
+      document.getElementById('kpi-pendentes').innerText = pendentes.length;
+      document.getElementById('kpi-execucao').innerText = state.orcamentos.filter(function(i) { return i.status === 'Em Execução'; }).length;
+      document.getElementById('kpi-concluidos').innerText = state.orcamentos.filter(function(i) { return i.status === 'Concluído'; }).length;
+      document.getElementById('kpi-total-etapas').innerText = state.orcamentos.length;
+
+      var containerPendencias = document.getElementById('lista-pendencias');
+      if (pendentes.length === 0) {
+        containerPendencias.innerHTML = '<p style="font-size:0.9rem; color:#5A7D4A;">✅ Nenhuma pendência de aprovação.</p>';
+      } else {
+        containerPendencias.innerHTML = pendentes.map(function(p) {
+          return '<div class="activity-card pending"><div><strong>' + p.servico + '</strong> (' + p.fornecedor + ')</div><span class="badge badge-EmCotação">Pendente</span></div>';
+        }).join('');
+      }
+
+      var containerProximas = document.getElementById('lista-proximas-atividades');
+      var proximas = state.orcamentos.filter(function(i) { return i.status !== 'Concluído'; });
+      if (proximas.length === 0) {
+        containerProximas.innerHTML = '<p style="font-size:0.9rem; color:#666;">Nenhum serviço em andamento.</p>';
+      } else {
+        containerProximas.innerHTML = proximas.slice(0, 5).map(function(a) {
+          return '<div class="activity-card"><div><strong>' + a.servico + '</strong></div><span class="badge badge-' + a.status.replace(/\s+/g, '') + '">' + a.status + '</span></div>';
+        }).join('');
+      }
+
+      renderCharts();
+    }
+
+    var chartStatusInstance = null;
+    function renderCharts() {
+      try {
+        if (typeof Chart === 'undefined') return;
+        var canvas = document.getElementById('chartStatus');
+        if (!canvas) return;
+
+        var ctx = canvas.getContext('2d');
+        var counts = state.orcamentos.reduce(function(acc, curr) {
+          acc[curr.status] = (acc[curr.status] || 0) + 1;
+          return acc;
+        }, {});
+
+        if (chartStatusInstance) chartStatusInstance.destroy();
+        chartStatusInstance = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(counts),
+            datasets: [{ data: Object.values(counts), backgroundColor: ['#F2C4C4', '#A8BC9A', '#E2E8F0', '#5A7D4A'] }]
+          },
+          options: { plugins: { title: { display: true, text: 'Progresso Físico da Obra' } } }
+        });
+      } catch(e) {}
+    }
+
+    // Inicialização
+    updateUI();
+  </script>
+</body>
+</html>
